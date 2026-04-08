@@ -106,10 +106,11 @@ func Provider() *schema.Provider {
 							ExactlyOneOf: []string{"data_api.0.workgroup_name", "data_api.0.cluster_identifier"},
 						},
 						"username": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Description: "The database user to connect as. Required at apply time when cluster_identifier is set.",
-							DefaultFunc: schema.EnvDefaultFunc("REDSHIFT_DATA_API_USERNAME", nil),
+							Type:         schema.TypeString,
+							Optional:     true,
+							Description:  "The database user to connect as. Required at apply time when cluster_identifier is set.",
+							DefaultFunc:  schema.EnvDefaultFunc("REDSHIFT_DATA_API_USERNAME", nil),
+							ValidateFunc: validation.StringLenBetween(1, 128),
 						},
 						"region": {
 							Type:        schema.TypeString,
