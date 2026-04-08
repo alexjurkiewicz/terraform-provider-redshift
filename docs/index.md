@@ -36,6 +36,19 @@ provider "redshift" {
 }
 ```
 
+### Authentication using Redshift Data API (provisioned cluster)
+
+```terraform
+provider "redshift" {
+  database = var.redshift_database
+  data_api {
+    cluster_identifier = var.redshift_cluster_identifier
+    username           = var.redshift_username
+    region             = var.aws_region
+  }
+}
+```
+
 ### Authentication using temporary credentials
 
 ```terraform
@@ -68,7 +81,7 @@ provider "redshift" {
 
 ### Optional
 
-- `data_api` (Block List, Max: 1) Configuration for using the Redshift Data API. This can only be used for serverless Redshift clusters. (see [below for nested schema](#nestedblock--data_api))
+- `data_api` (Block List, Max: 1) Configuration for using the Redshift Data API. Supports both serverless workgroups and provisioned clusters. (see [below for nested schema](#nestedblock--data_api))
 - `database` (String) The name of the database to connect to. The default is `redshift`.
 - `host` (String) Name of Redshift server address to connect to.
 - `max_connections` (Number) Maximum number of connections to establish to the database. Zero means unlimited.
@@ -83,11 +96,13 @@ provider "redshift" {
 
 Required:
 
-- `workgroup_name` (String) The name of the Redshift Serverless workgroup to connect to.
+- `region` (String) The AWS region where the Redshift workgroup or cluster is located.
 
 Optional:
 
-- `region` (String) The AWS region where the Redshift Serverless workgroup is located. If not specified, the region will be determined from the AWS SDK configuration.
+- `cluster_identifier` (String) The identifier of the provisioned Redshift cluster to connect to. Exactly one of `workgroup_name` or `cluster_identifier` must be set.
+- `username` (String) The database user to connect as. Required at apply time when cluster_identifier is set.
+- `workgroup_name` (String) The name of the Redshift Serverless workgroup to connect to. Exactly one of `workgroup_name` or `cluster_identifier` must be set.
 
 
 <a id="nestedblock--temporary_credentials"></a>
