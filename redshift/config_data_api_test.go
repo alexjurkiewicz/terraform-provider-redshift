@@ -1,6 +1,7 @@
 package redshift
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -12,10 +13,24 @@ func TestBuildConnStrFromDataApiClusterConfig(t *testing.T) {
 	}
 }
 
-func TestGetConfigFromDataApiResourceData_ClusterMissingUsername(t *testing.T) {
-	_, err := newDataApiClusterConfig("my-cluster", "", "mydb", "us-east-1", 1)
+func TestNewDataApiClusterConfig_MissingUsername(t *testing.T) {
+	_, err := NewDataApiClusterConfig("my-cluster", "", "mydb", "us-east-1", 1)
 	if err == nil {
 		t.Fatal("expected error when username is empty, got nil")
+	}
+	if !strings.Contains(err.Error(), "username") {
+		t.Errorf("expected error to mention 'username', got: %v", err)
+	}
+}
+
+func TestNewDataApiClusterConfig_HappyPath(t *testing.T) {
+	cfg, err := NewDataApiClusterConfig("my-cluster", "myuser", "mydb", "us-east-1", 1)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	want := "myuser@cluster(my-cluster)/mydb?region=us-east-1&transactionMode=non-transactional&requestMode=blocking"
+	if cfg.ConnStr != want {
+		t.Errorf("cfg.ConnStr = %q, want %q", cfg.ConnStr, want)
 	}
 }
 

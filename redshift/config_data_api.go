@@ -22,7 +22,7 @@ func buildConnStrFromDataApiConfig(workgroupName, database, awsRegion string) st
 	)
 }
 
-func newDataApiClusterConfig(clusterIdentifier, username, database, awsRegion string, maxConns int) (*Config, error) {
+func NewDataApiClusterConfig(clusterIdentifier, username, database, awsRegion string, maxConns int) (*Config, error) {
 	if username == "" {
 		return nil, fmt.Errorf("data_api configuration with cluster_identifier requires username to be set")
 	}
@@ -47,11 +47,13 @@ func getConfigFromDataApiResourceData(d *schema.ResourceData, database string) (
 	}
 
 	if clusterIdentifierOk {
-		username, _ := d.GetOk("data_api.0.username")
-		return newDataApiClusterConfig(clusterIdentifier.(string), username.(string), database, region.(string), 1)
+		username := d.Get("data_api.0.username").(string)
+		// Data API connections are non-pooled; one connection is sufficient.
+		return NewDataApiClusterConfig(clusterIdentifier.(string), username, database, region.(string), 1)
 	}
 
 	if workgroupNameOk {
+		// Data API connections are non-pooled; one connection is sufficient.
 		return NewDataApiConfig(workgroupName.(string), database, region.(string), 1), nil
 	}
 
