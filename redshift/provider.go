@@ -82,6 +82,7 @@ func Provider() *schema.Provider {
 				ConflictsWith: []string{
 					"host",
 					"password",
+					"temporary_credentials",
 				},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -107,7 +108,7 @@ func Provider() *schema.Provider {
 						"username": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "The database user to connect as. Required when using cluster_identifier.",
+							Description: "The database user to connect as. Required at apply time when cluster_identifier is set.",
 							DefaultFunc: schema.EnvDefaultFunc("REDSHIFT_DATA_API_USERNAME", nil),
 						},
 						"region": {
@@ -213,6 +214,7 @@ func getConfigFromResourceData(d *schema.ResourceData, temporaryCredentialsResol
 	useDataApi := useDataApiWorkgroup || useDataApiCluster
 	_, usePqResourceData := d.GetOk("host")
 
+	// Defence-in-depth: ConflictsWith in the schema already prevents this at plan time.
 	if useDataApi && usePqResourceData {
 		return nil, fmt.Errorf("using both auth methods 'data_api' and 'host' is not allowed")
 	}
