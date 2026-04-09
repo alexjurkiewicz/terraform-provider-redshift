@@ -273,6 +273,11 @@ WHERE pg_database_info.datid = $1
 	}
 	d.Set(databaseDatashareSourceAttr, dataShareConfiguration)
 
+	// The Redshift catalog does not expose the integration ID for zero ETL databases,
+	// so we cannot read it back after creation. The existing state value is preserved
+	// to avoid spurious drift during plan. Import of zero ETL databases is not supported.
+	d.Set(databaseZeroETLIntegrationAttr, d.Get(databaseZeroETLIntegrationAttr))
+
 	return nil
 }
 
